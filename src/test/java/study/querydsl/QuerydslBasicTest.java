@@ -88,7 +88,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    @DisplayName("검색 조건 쿼리")
+    @DisplayName("검색 조건 쿼리 테스트")
     void search() {
         Member findMember = queryFactory
                 .selectFrom(member)
@@ -101,7 +101,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    @DisplayName("and 조건을 파라미터로 처리")
+    @DisplayName("and 조건을 파라미터로 처리 테스트")
     void searchAndParam() {
         Member findMember = queryFactory
                 .selectFrom(member)
@@ -114,7 +114,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    @DisplayName("결과 조회")
+    @DisplayName("결과 조회 테스트")
     void resultFetch() {
         List<Member> fetch = queryFactory
                 .selectFrom(member)
@@ -141,5 +141,35 @@ public class QuerydslBasicTest {
         long total = queryFactory
                 .selectFrom(member)
                 .fetchCount();
+
+        assertThat(total).isEqualTo(totalCount);
+    }
+
+    /**
+     * 회원 정렬 순서
+     * 1. 회원 나이 내림차순 (desc)
+     * 2. 회원 이름 오름차순 (asc)
+     * 단, 2에서 회원 이름이 없으면 마지막에 출력 (nulls last)
+     */
+    @Test
+    @DisplayName("정렬 테스트")
+    void sort() {
+        entityManager.persist(new Member(null, 100));
+        entityManager.persist(new Member("member5", 100));
+        entityManager.persist(new Member("member6", 100));
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(100))
+                .orderBy(member.age.desc(), member.username.asc().nullsLast())
+                .fetch();
+
+        Member member5 = result.get(0);
+        Member member6 = result.get(1);
+        Member memberNull = result.get(2);
+
+        assertThat(member5.getUsername()).isEqualTo("member5");
+        assertThat(member6.getUsername()).isEqualTo("member6");
+        assertThat(memberNull.getUsername()).isNull();
     }
 }
