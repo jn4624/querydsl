@@ -7,7 +7,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -589,48 +589,45 @@ public class QuerydslBasicTest {
     @DisplayName("프로퍼티 접근 DTO 조회 테스트")
     void findDtoByPropertySetter() {
         // 프로퍼티 접근시 dto 클래스에 기본 생성자가 존재해야 함.
-        List<Tuple> result = queryFactory
-                .select(Projections.bean(MemberDto.class),
+        List<MemberDto> result = queryFactory
+                .select(Projections.bean(MemberDto.class,
                         member.username,
-                        member.age)
+                        member.age))
                 .from(member)
                 .fetch();
 
-        for (Tuple tuple : result) {
-            System.out.println("tuple.get(member.username) = " + tuple.get(member.username));
-            System.out.println("tuple.get(member.age) = " + tuple.get(member.age));
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 
     @Test
     @DisplayName("필드 직접 접근 DTO 조회 테스트")
     void findDtoByFields() {
-        List<Tuple> result = queryFactory
-                .select(Projections.fields(MemberDto.class),
+        List<MemberDto> result = queryFactory
+                .select(Projections.fields(MemberDto.class,
                         member.username,
-                        member.age)
+                        member.age))
                 .from(member)
                 .fetch();
 
-        for (Tuple tuple : result) {
-            System.out.println("tuple.get(member.username) = " + tuple.get(member.username));
-            System.out.println("tuple.get(member.age) = " + tuple.get(member.age));
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 
     @Test
     @DisplayName("생성자 접근 DTO 조회 테스트")
     void findDtoByConstructor() {
-        List<Tuple> result = queryFactory
-                .select(Projections.constructor(MemberDto.class),
+        List<MemberDto> result = queryFactory
+                .select(Projections.constructor(MemberDto.class,
                         member.username,
-                        member.age)
+                        member.age))
                 .from(member)
                 .fetch();
 
-        for (Tuple tuple : result) {
-            System.out.println("tuple.get(member.username) = " + tuple.get(member.username));
-            System.out.println("tuple.get(member.age) = " + tuple.get(member.age));
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 
@@ -665,6 +662,34 @@ public class QuerydslBasicTest {
 
         for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
+        }
+    }
+
+    /**
+     * @QueryProjection
+     *
+     * 장점
+     * - 컴파일러로 타입을 체크할 수 있어서 안전하다.
+     *
+     * 단점
+     * - DTO 에 Querydsl 어노테이션을 유지해야 하기 때문에 의존성을 가지게 된다.
+     * - DTO 까지 Q 파일을 생성해야 한다.
+     *
+     * Projections.constructor 와의 차이점
+     * - Projections.constructor 는 필드가 늘어나도 컴파일 시점에 오류를 발견할 수 없고
+     * 런타임 시점 즉, 사용자가 해당 코드를 실행한 순간 오류가 발견된다.
+     * @QueryProjection은 컴파일 시점에 타입 체크로 오류가 발견된다.
+     */
+    @Test
+    @DisplayName("@QueryProjection 테스트")
+    void findDtoByQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 }
