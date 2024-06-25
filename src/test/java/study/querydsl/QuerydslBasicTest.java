@@ -749,4 +749,47 @@ public class QuerydslBasicTest {
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
         return usernameEq(usernameCond).and(ageEq(ageCond));
     }
+
+    /**
+     * bulk 연산시 주의 사항
+     * JPQL 과 마찬가지로, 영속성 컨텍스트에 있는 엔티티를 무시하고 실행되기 때문에
+     * 배치 쿼리 실행 후 영속성 컨텍스트를 초기화 하는 것이 안전하다.
+     */
+    @Test
+    @DisplayName("수정 벌크 연산 테스트")
+    void bulkUpdate() {
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        assertThat(count).isEqualTo(2);
+    }
+
+    /**
+     * 곱하기: multiply
+     * 빼기: 미지원
+     */
+    @Test
+    @DisplayName("기존 숫자에 더하기 테스트")
+    void bulkAdd() {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+
+        assertThat(count).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("삭제 벌크 연산 테스트")
+    void bulkDelete() {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(10))
+                .execute();
+
+        assertThat(count).isEqualTo(3);
+    }
 }
