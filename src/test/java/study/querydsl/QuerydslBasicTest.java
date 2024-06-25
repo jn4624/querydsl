@@ -792,4 +792,45 @@ public class QuerydslBasicTest {
 
         assertThat(count).isEqualTo(3);
     }
+
+    /**
+     * function 사용시 Dialect 에 존재하는지 확인하고 사용해야 한다.
+     * 사용자 정의 function 을 사용할 경우 데이터베이스에 맞는 Dialect 를 상속 받은
+     * 클래스를 정의하고 application.yml 에 dialect 설정으로 지정해서 사용해야 한다.
+     */
+    @Test
+    @DisplayName("SQL Function replace 호출 테스트")
+    void sqlFunction1() {
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate(
+                        "function('replace', {0}, {1}, {2})",
+                        member.username,
+                        "member",
+                        "M"))
+                .from(member)
+                .fetch();
+
+        for (String replaceUsername : result) {
+            System.out.println("replaceUsername = " + replaceUsername);
+        }
+    }
+
+    @Test
+    @DisplayName("SQL Function lower 호출 테스트")
+    void sqlFunction2() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+//                .where(member.username.eq(
+//                        Expressions.stringTemplate(
+//                                "function('lower', {0})",
+//                                member.username
+//                        )))
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        for (String lowerUsername : result) {
+            System.out.println("lowerUsername = " + lowerUsername);
+        }
+    }
 }
