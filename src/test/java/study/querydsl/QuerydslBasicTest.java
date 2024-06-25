@@ -540,4 +540,31 @@ public class QuerydslBasicTest {
             System.out.println("concatStr = " + concatStr);
         }
     }
+
+    @Test
+    @DisplayName("프로젝션과 결과 반환 테스트 - 프로젝션 대상 하나")
+    void simpleProjection() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+
+        for (String username : result) {
+            System.out.println("username = " + username);
+        }
+    }
+
+    @Test
+    @DisplayName("프로젝션 결과 반환 테스트 - 튜플")
+    void tupleProjection() {
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple.get(member.username) = " + tuple.get(member.username));
+            System.out.println("tuple.get(member.age) = " + tuple.get(member.age));
+        }
+    }
 }
