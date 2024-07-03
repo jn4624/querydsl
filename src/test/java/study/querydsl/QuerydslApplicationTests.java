@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class QuerydslApplicationTests {
+
 	@Autowired
 	EntityManager entityManager;
 
