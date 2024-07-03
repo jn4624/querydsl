@@ -2,14 +2,17 @@ package study.querydsl.repository.impl;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.dto.QMemberTeamDto;
+import study.querydsl.entity.Member;
 import study.querydsl.repository.MemberRepositoryCustom;
 
 import java.util.List;
@@ -104,7 +107,29 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
+//        long total = queryFactory
+//                .select(member)
+//                .from(member)
+//                .leftJoin(member.team, team)
+//                .where(usernameEq(condition.getUsername()),
+//                        teamNameEq(condition.getTeamName()),
+//                        ageGoe(condition.getAgeGoe()),
+//                        ageLoe(condition.getAgeLoe()))
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
+//                .fetchCount();
+
+//        return new PageImpl<>(content, pageable, total);
+
+        /**
+         * CountQuery 최적화
+         * - 스프링 데이터 라이브러리가 제공
+         * - count 쿼리 생략 가능한 경우 생략 처리
+         *   - 페이지 시작시 컨텐츠 사이즈가 페이지 사이즈보다 작을 때
+         *   - 마지막 페이지일 때 (offset + 컨텐츠 사이즈를 더해서 전체 사이즈를 구함,
+         *     더 정확히는 마지막 페이지면서 컨텐츠 사이즈가 페이지 사이즈보다 작을 때)
+         */
+        JPAQuery<Member> countQuery = queryFactory
                 .select(member)
                 .from(member)
                 .leftJoin(member.team, team)
@@ -113,10 +138,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         ageGoe(condition.getAgeGoe()),
                         ageLoe(condition.getAgeLoe()))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetchCount();
+                .limit(pageable.getPageSize());
 
-        return new PageImpl<>(content, pageable, total);
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 
     private BooleanExpression usernameEq(String username) {
