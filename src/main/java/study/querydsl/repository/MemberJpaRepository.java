@@ -3,7 +3,6 @@ package study.querydsl.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 import study.querydsl.dto.MemberSearchCondition;
@@ -12,17 +11,17 @@ import study.querydsl.dto.QMemberTeamDto;
 
 import java.util.List;
 
-import static io.micrometer.common.util.StringUtils.*;
+import static io.micrometer.common.util.StringUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.team;
 
 @Repository
-public class MemberQuerydslRepository {
+public class MemberJpaRepository {
     private final EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
 
-    public MemberQuerydslRepository(EntityManager entityManager) {
+    public MemberJpaRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);
     }

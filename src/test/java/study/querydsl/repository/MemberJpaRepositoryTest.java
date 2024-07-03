@@ -16,12 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class MemberQuerydslRepositoryTest {
+class MemberJpaRepositoryTest {
     @Autowired
     EntityManager entityManager;
 
     @Autowired
-    MemberQuerydslRepository memberQuerydslRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Test
     void searchTest() {
@@ -46,7 +46,7 @@ class MemberQuerydslRepositoryTest {
         condition.setAgeLoe(40);
         condition.setTeamName("teamB");
 
-        List<MemberTeamDto> result = memberQuerydslRepository.searchByBuilder(condition);
+        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
 
         for (MemberTeamDto memberTeamDto : result) {
             System.out.println("memberTeamDto = " + memberTeamDto);
@@ -78,7 +78,7 @@ class MemberQuerydslRepositoryTest {
         condition.setAgeLoe(40);
         condition.setTeamName("teamB");
 
-        List<MemberTeamDto> result = memberQuerydslRepository.searchByWhereParameter(condition);
+        List<MemberTeamDto> result = memberJpaRepository.searchByWhereParameter(condition);
 
         for (MemberTeamDto memberTeamDto : result) {
             System.out.println("memberTeamDto = " + memberTeamDto);
